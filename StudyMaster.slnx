@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="StudyMaster/StudyMaster.vcxproj" Id="d869eb8d-6639-4ad7-8d8e-2d6ff48fb3ed" />
+</Solution>
