@@ -37,7 +37,7 @@ std::string generateQuestion(int questionType, element MaterialChose, matlab::en
 		u"time",
 		factory.createScalar<double>(Time(gen))
 	);
-	matlab->eval(u"remaining_atoms = initialAtoms * exp(-decay_constant * time);");
+	matlab->eval(u"remaining_atoms = initialAtoms * exp(-decay_constant * time * 3600);");
 	matlab::data::TypedArray<double> remainingAtoms = matlab->getVariable(u"remaining_atoms");
 	matlab->eval(u"activity = decay_constant * remaining_atoms;");
 	matlab::data::TypedArray<double> activity = matlab->getVariable(u"activity");
@@ -48,11 +48,15 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
 	double ac = 0.714;
 	double aa = 23.2;
 
+	double mn = 1.00866491606;
+	double mp = 1.007276466621;
+	double c = 931.5;
+
 
 	switch (questionType) {
     case 1:
     {
-        question = "A parent Isotope  " + MaterialChose.symbol + "-" +std::to_string(MaterialChose.A) + " has a half-life of " +std::to_string(halflife(gen)) +" hours. The molar mass of this isotope is " +std::to_string(MaterialChose.MolarMass) +" g/mol. It has an initial value of atoms at: " +formatted.str() +" atoms. Find the: ";
+		question = "A parent Isotope  " + MaterialChose.symbol + "-" +std::to_string(MaterialChose.A) + " has a half-life of " +std::to_string(halflife(gen)) +" hours. The atomic mass of this isotope is " +std::to_string(MaterialChose.atomicMassU) +" u. It has an initial value of atoms at: " +formatted.str() +" atoms. Find the: ";
         switch (Questionaire(gen)) {
 		case 1:
 		{
@@ -108,8 +112,10 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
         break;
     }
 	case 2:
+	{
 
 		question = "Given : a_s = 18.3 MeV, a_v = 15.8 MeV, a_c = 0.714 MeV, a_a = 23.2 MeV, and a_p = 12.0 MeV, as well as " + std::to_string(MaterialChose.Z) + " and " + std::to_string(MaterialChose.A) + ", determine the: ";
+		int N = MaterialChose.A - MaterialChose.Z;
 		switch (Questionaire2(gen)) {
 		case 1:
 			question += "nuclear total binding energy of the nucleus.";
@@ -117,10 +123,10 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
 			std::cout << "Your answer: ";
 			std::cin >> QuestionAnswer;
 
-			if (MaterialChose.A % 2 == 0 && MaterialChose.Z % 2 == 0) {
+			if (N % 2 == 0 && MaterialChose.Z % 2 == 0) {
 				std::cout << "The nucleus is even-even, so the binding energy is higher than average.\n";
-				double bindingEnergy = (av * MaterialChose.A) - (as * pow(MaterialChose.A, 2.0 / 3.0)) - (ac * ((MaterialChose.Z * (MaterialChose.Z - 1)) / pow(MaterialChose.A, 1.0 / 3.0))) - (aa * (pow((MaterialChose.A - 2 * MaterialChose.Z),2.0) / MaterialChose.A)) +(12 * pow(MaterialChose.A, -1.0 / 2.0));
-				double error = ((std::abs(QuestionAnswer - bindingEnergy)/bindingEnergy)* 100);
+				double bindingEnergy = (av * MaterialChose.A) - (as * pow(MaterialChose.A, 2.0 / 3.0)) - (ac * ((MaterialChose.Z * (MaterialChose.Z - 1)) / pow(MaterialChose.A, 1.0 / 3.0))) - (aa * (pow((MaterialChose.A - 2 * MaterialChose.Z), 2.0) / MaterialChose.A)) + (12 * pow(MaterialChose.A, -1.0 / 2.0));
+				double error = ((std::abs(QuestionAnswer - bindingEnergy) / bindingEnergy) * 100);
 				if (error < 5) {
 					std::cout << "Correct answer! The binding energy is: "
 						<< bindingEnergy << " MeV.\n";
@@ -129,7 +135,7 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
 					std::cout << "Incorrect answer.\n" << bindingEnergy << " MeV.\n";
 				}
 			}
-			else if (MaterialChose.A % 2 != 0 && MaterialChose.Z % 2 != 0) {
+			else if (N % 2 != 0 && MaterialChose.Z % 2 != 0) {
 				std::cout << "The nucleus is odd-odd, so the binding energy is lower than average.\n";
 				double bindingEnergy = (av * MaterialChose.A) - (as * pow(MaterialChose.A, 2.0 / 3.0)) - (ac * ((MaterialChose.Z * (MaterialChose.Z - 1)) / pow(MaterialChose.A, 1.0 / 3.0))) - (aa * (pow((MaterialChose.A - 2 * MaterialChose.Z), 2.0) / MaterialChose.A)) - (12 * pow(MaterialChose.A, -1.0 / 2.0));
 				double error = ((std::abs(QuestionAnswer - bindingEnergy) / bindingEnergy) * 100);
@@ -154,13 +160,14 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
 				}
 			}
 			break;
-		case 2:
+		case 2: {
 			question += "the specific binding energy per nucleon for the specified nucleus.";
 			std::cout << question << '\n';
 			std::cout << "Your answer: ";
 			std::cin >> QuestionAnswer;
-			
-			if (MaterialChose.A % 2 == 0 && MaterialChose.Z % 2 == 0) {
+
+
+			if (N % 2 == 0 && MaterialChose.Z % 2 == 0) {
 				std::cout << "The nucleus is even-even, so the binding energy is higher than average.\n";
 				double bindingEnergy = (av * MaterialChose.A) - (as * pow(MaterialChose.A, 2.0 / 3.0)) - (ac * ((MaterialChose.Z * (MaterialChose.Z - 1)) / pow(MaterialChose.A, 1.0 / 3.0))) - (aa * (pow((MaterialChose.A - 2 * MaterialChose.Z), 2.0) / MaterialChose.A)) + (12 * pow(MaterialChose.A, -1.0 / 2.0));
 				double specificBindingEnergy = bindingEnergy / MaterialChose.A;
@@ -173,7 +180,7 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
 					std::cout << "Incorrect answer.\n";
 				}
 			}
-			else if (MaterialChose.A % 2 != 0 && MaterialChose.Z % 2 != 0) {
+			else if (N % 2 != 0 && MaterialChose.Z % 2 != 0) {
 				std::cout << "The nucleus is odd-odd, so the binding energy is lower than average.\n";
 				double bindingEnergy = (av * MaterialChose.A) - (as * pow(MaterialChose.A, 2.0 / 3.0)) - (ac * ((MaterialChose.Z * (MaterialChose.Z - 1)) / pow(MaterialChose.A, 1.0 / 3.0))) - (aa * (pow((MaterialChose.A - 2 * MaterialChose.Z), 2.0) / MaterialChose.A)) - (12 * pow(MaterialChose.A, -1.0 / 2.0));
 				double specificBindingEnergy = bindingEnergy / MaterialChose.A;
@@ -202,22 +209,35 @@ std::uniform_int_distribution<int>Questionaire2(1, 2);
 			break;
 			break;
 		}
-		break;
-	case 3:
-		question = "Given: Determine the: ";
-		switch (Questionaire(gen)-1) {
-		case 0:
-		case 1:
-			question += "nuclear total binding energy of the nucleus.";
-			std::cout << question << '\n';
-			std::cout << "Your answer: ";
-			std::cin >> QuestionAnswer;
-
-			break;
-		case 2:
-			question += "the specific binding energy per nucleon for the specified nucleus.";
-			break;
+			  break;
 		}
+		break;
+	}
+	case 3: {
+
+
+		question = "Calculate the binding energy of the nucleus " + MaterialChose.symbol + "-" + std::to_string(MaterialChose.A) + " with a Z value of: " + std::to_string(MaterialChose.Z);
+		+" using the Mass defect method.";
+		std::cout << question << '\n';
+		std::cout << "Your answer: ";
+		std::cin >> QuestionAnswer;
+		int Z = MaterialChose.Z;
+		int A = MaterialChose.A;
+		int N = A - Z;
+		double massDefect = ((Z * mp)+ (N * mn)) - MaterialChose.atomicMassU;
+		double bindingEnergys = massDefect * c;
+		double error = ((std::abs(QuestionAnswer - bindingEnergys) / bindingEnergys) * 100);
+		if (error < 5) {
+			std::cout << "Correct answer! The binding energy is: "
+				<< bindingEnergys << " MeV.\n";
+		}
+		else {
+			std::cout << "Incorrect answer.\n" << bindingEnergys << " MeV.\n";
+		}
+		break;
+	}
+
+
 	case 4:
 		question = "Discuss the nuclear models and parity for the given nucleus.";
 		break;
@@ -244,7 +264,7 @@ int main() {
 	}
 	element material = Materials();
 	std::cout << "Selected isotope: " << material.symbol << "-" << material.A << std::endl;
-	std::cout << "Molar mass: " << material.MolarMass << " g/mol" << std::endl;
+	std::cout << "Atomic mass: " << material.atomicMassU << " u" << std::endl;
 	std::cout << "Atomic number: " << material.Z << std::endl;
 
     switch (Answer) {
